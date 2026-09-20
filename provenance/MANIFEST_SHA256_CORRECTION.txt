@@ -1,0 +1,21 @@
+# SHA-256 integrity correction for supplied OSF storage archive
+# Project: Operationalizing Self-Modeling Organization (Psi) in Artificial Systems
+# OSF project: https://osf.io/n3dqu/
+# Audit date: 2026-09-21
+#
+# ADDITIVE RECORD: this file does not replace or modify MANIFEST_SHA256_ORIGINAL.txt.
+# Hashes below were computed from the actual files contained in the supplied
+# Archive of OSF Storage ZIP.
+
+b287004cffc12ee44775d4b1bd83a35256bf1620227ed5a3fd94fb60108bd4db  README.md
+9edb25260d8437ac1ad8c31b2201870d85d6b376b87918e942dabe0b02334f58  colab_psi_benchmark.py
+8d42d54ecb33e937a30f08973f02675cbb75de5b0f136f1cc2de91bd4ab8c583  paper_manuscript.pdf
+7cc745074f2db98686f01f20baa9e41ff8fb3059d86ac9e4e444e94e5f9dcccd  run_llm_benchmark.py
+
+# Comparison:
+# MATCH    colab_psi_benchmark.py
+# MATCH    run_llm_benchmark.py
+# MISMATCH README.md
+# MISMATCH paper_manuscript.pdf
+#
+# The original manifest is intentionally preserved for provenance.
