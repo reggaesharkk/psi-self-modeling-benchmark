@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the OSF archival record."
+title: "Operationalizing Self-Modeling Organization (Psi) in Artificial Systems"
+authors:
+  - family-names: "Upadhyay"
+    given-names: "Prince"
+type: software
+date-released: 2026-09-21
+repository-code: "https://github.com/reggaesharkk/psi-self-modeling-benchmark"
+repository-artifact: "https://osf.io/n3dqu/"
