@@ -1,5 +1,13 @@
 # Operationalizing Self-Modeling Organization (Psi) in Artificial Systems
 
+## Ψ Benchmark v4 update
+
+The later v4 benchmark line is preserved as a separate **pre-confirmatory diagnostic** with deterministic self-vs-peer 2AFC comparisons, matched controls, anonymized presentation, style controls, and chance baseline p=0.5. It remains distinct from the frozen Self-Referential Processing Gate framework and from the later Design Lab Phase 7 simulation-validation program.
+
+The presence of v4 benchmark machinery does not by itself establish a confirmed self-referential effect or machine consciousness.
+
+---
+
 **Author:** Prince Upadhyay  
 **Independent Research**
 
