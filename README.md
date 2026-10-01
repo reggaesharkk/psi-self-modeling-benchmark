@@ -1,5 +1,7 @@
 # Operationalizing Self-Modeling Organization (Psi) in Artificial Systems
 
+> **Rights boundary — effective 1 October 2026:** New author-owned original material first published here from this date is **All Rights Reserved** by default. Earlier express licenses remain in force for the material they cover. Read [the rights policy](RIGHTS_POLICY_2026_10_01.md) and the [shared portfolio evidence standard](https://github.com/reggaesharkk/Reggae-shark-universe-/blob/main/PORTFOLIO_EVIDENCE_AND_RIGHTS_STANDARD_2026_10_01.md).
+
 ## Ψ Benchmark v4 update
 
 The later v4 benchmark line is preserved as a separate **pre-confirmatory diagnostic** with deterministic self-vs-peer 2AFC comparisons, matched controls, anonymized presentation, style controls, and chance baseline p=0.5. It remains distinct from the frozen Self-Referential Processing Gate framework and from the later Design Lab Phase 7 simulation-validation program.
