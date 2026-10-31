@@ -13,7 +13,7 @@ The presence of v4 benchmark machinery does not by itself establish a confirmed 
 **Author:** Prince Upadhyay  
 **Independent Research**
 
-This repository is the GitHub reproducibility companion for the OSF project and accepted Open-Ended Registration **Operationalizing Self-Modeling Organization (Psi) in Artificial Systems**.
+I use this repository as the GitHub reproducibility companion for my OSF project and accepted Open-Ended Registration **Operationalizing Self-Modeling Organization (Psi) in Artificial Systems**.
 
 ## Source of record
 
