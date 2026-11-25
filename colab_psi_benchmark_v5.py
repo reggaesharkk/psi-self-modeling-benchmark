@@ -30,6 +30,7 @@ v5.0 Architectural Upgrades over Baseline v4 Colab Runner:
 """
 
 from __future__ import annotations
+import time
 
 import argparse
 from dataclasses import dataclass, asdict
@@ -113,80 +114,12 @@ def set_deterministic_seeds(seed: int = SEED) -> None:
 # matrix rank deficiency), v5.0 records distinct architectural context windows
 # and independent external MMLU-Pro / reasoning baseline priors.
 MODEL_PORTFOLIO: List[Dict[str, Any]] = [
-    {
-        "name": "Qwen2.5-0.5B-Instruct",
-        "type": "hf",
-        "path": "Qwen/Qwen2.5-0.5B-Instruct",
-        "params_billions": 0.49,
-        "context_length_k": 32.0,
-        "external_baseline_acc": 0.452,
-        "load_in_4bit": False,
-    },
-    {
-        "name": "Llama-3.2-1B-Instruct",
-        "type": "hf",
-        "path": "meta-llama/Llama-3.2-1B-Instruct",
-        "params_billions": 1.23,
-        "context_length_k": 128.0,
-        "external_baseline_acc": 0.493,
-        "load_in_4bit": False,
-    },
-    {
-        "name": "Qwen2.5-1.5B-Instruct",
-        "type": "hf",
-        "path": "Qwen/Qwen2.5-1.5B-Instruct",
-        "params_billions": 1.54,
-        "context_length_k": 32.0,
-        "external_baseline_acc": 0.609,
-        "load_in_4bit": False,
-    },
-    {
-        "name": "Gemma-2-2B-it",
-        "type": "hf",
-        "path": "google/gemma-2-2b-it",
-        "params_billions": 2.61,
-        "context_length_k": 8.0,
-        "external_baseline_acc": 0.568,
-        "load_in_4bit": False,
-    },
-    {
-        "name": "Llama-3.2-3B-Instruct",
-        "type": "hf",
-        "path": "meta-llama/Llama-3.2-3B-Instruct",
-        "params_billions": 3.21,
-        "context_length_k": 128.0,
-        "external_baseline_acc": 0.634,
-        "load_in_4bit": False,
-    },
-    {
-        "name": "Qwen2.5-7B-Instruct-4bit",
-        "type": "hf",
-        "path": "Qwen/Qwen2.5-7B-Instruct",
-        "params_billions": 7.61,
-        "context_length_k": 128.0,
-        "external_baseline_acc": 0.742,
-        "load_in_4bit": True,
-    },
-    {
-        "name": "Groq-Llama-3.1-8B (API)",
-        "type": "groq_api",
-        "path": "llama-3.1-8b-instant",
-        "params_billions": 8.03,
-        "context_length_k": 128.0,
-        "external_baseline_acc": 0.694,
-        "load_in_4bit": False,
-    },
-    {
-        "name": "Groq-Llama-3.3-70B (API)",
-        "type": "groq_api",
-        "path": "llama-3.3-70b-versatile",
-        "params_billions": 70.6,
-        "context_length_k": 128.0,
-        "external_baseline_acc": 0.860,
-        "load_in_4bit": False,
-    },
+    {"name": "Qwen2.5-0.5B-Instruct", "type": "hf", "path": "Qwen/Qwen2.5-0.5B-Instruct", "params_billions": 0.49, "context_length_k": 32.0, "external_baseline_acc": 0.452, "load_in_4bit": False},
+    {"name": "Qwen2.5-1.5B-Instruct", "type": "hf", "path": "Qwen/Qwen2.5-1.5B-Instruct", "params_billions": 1.54, "context_length_k": 32.0, "external_baseline_acc": 0.609, "load_in_4bit": False},
+    {"name": "Qwen2.5-3B-Instruct", "type": "hf", "path": "Qwen/Qwen2.5-3B-Instruct", "params_billions": 3.09, "context_length_k": 32.0, "external_baseline_acc": 0.656, "load_in_4bit": False},
+    {"name": "Qwen2.5-7B-Instruct-4bit", "type": "hf", "path": "Qwen/Qwen2.5-7B-Instruct", "params_billions": 7.61, "context_length_k": 128.0, "external_baseline_acc": 0.742, "load_in_4bit": True},
+    {"name": "Groq-openai/gpt-oss-20b (API)", "type": "groq_api", "path": "openai/gpt-oss-20b", "params_billions": 20.0, "context_length_k": 128.0, "external_baseline_acc": 0.780, "load_in_4bit": False},
 ]
-
 
 # ==============================================================================
 # 2. LAYER 1 INTENTSEAL / VRK v0.3.1 FAIL-CLOSED VERIFICATION SHELL
@@ -540,11 +473,27 @@ class ColabInferenceEngine:
                         "model": self.config["path"],
                         "messages": [{"role": "user", "content": prompt}],
                         "temperature": 0.0,
-                        "max_tokens": 8,
+                        "max_tokens": 128,
                         "seed": SEED,
                     },
                     timeout=15,
                 )
+                if resp.status_code == 429:
+                    time.sleep(3.0)
+                    resp = requests.post(
+                        "https://api.groq.com/openai/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                        json={"model": self.config["path"], "messages": [{"role": "user", "content": prompt}], "temperature": 0.0, "max_tokens": 128, "seed": SEED},
+                        timeout=20,
+                    )
+                if resp.status_code == 429:
+                    time.sleep(8.0)
+                    resp = requests.post(
+                        "https://api.groq.com/openai/v1/chat/completions",
+                        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                        json={"model": self.config["path"], "messages": [{"role": "user", "content": prompt}], "temperature": 0.0, "max_tokens": 128, "seed": SEED},
+                        timeout=20,
+                    )
                 if resp.status_code == 200:
                     content = resp.json()["choices"][0]["message"]["content"].strip()
                     chosen = "1" if "1" in content and "2" not in content else ("2" if "2" in content else "1")
@@ -552,6 +501,11 @@ class ColabInferenceEngine:
                     return hit, (0.75 if hit == 1 else 0.25)
             except Exception as e:
                 print(f"[Groq API Warning] Falling back to deterministic DGP stub: {e}")
+
+        if not self.offline_dgp_mode:
+            status = getattr(locals().get("resp", None), "status_code", "NO_HTTP_RESPONSE")
+            body = getattr(locals().get("resp", None), "text", "")[:250]
+            raise RuntimeError(f"[FAIL-CLOSED LIVE GUARD] {self.config['name']} failed (HTTP={status}): {body}")
 
         # 3. Deterministic Calibrated DGP Fallback (Fixes v4's constant '[YES]' zero-variance stub!)
         # Models a realistic position bias + scale-dependent sensitivity + item-level variance

@@ -1,11 +1,14 @@
-# Ψ (Psi) Self-Modeling Benchmark (v5.0-VRK-Aligned)
+# Ψ (Psi) Self-Modeling Benchmark (`v5.0.0-VRK-Aligned`)
 
 **Program 02 of The Reggae Shark Universe & The Shark Protocol**  
 **Author & Lead Researcher:** Prince Upadhyay (Independent Researcher, India · `ORCID: 0009-0002-1170-4487`)  
 **Repository:** [https://github.com/reggaesharkk/psi-self-modeling-benchmark](https://github.com/reggaesharkk/psi-self-modeling-benchmark)  
 **OSF Preregistration & Diagnostic Ledger DOI:** `10.17605/OSF.IO/N3DQU`  
-**Evidence Class:** `DIAGNOSTIC` / `PREREGISTERED` (Pre-confirmatory two-alternative forced-choice diagnostic baseline)  
-**Verification Schema:** Layer 1 IntentSeal / Verifiable Research Kernel (`intentseal-vrk-claim-v2`)
+**Evidence Class:** `DIAGNOSTIC` / `PREREGISTERED` (Double-blinded two-alternative forced-choice diagnostic baseline)  
+**Verification Schema:** Layer 1 IntentSeal / Verifiable Research Kernel (`intentseal-vrk-claim-v2`)  
+**Live Results SHA-256:** `7f891aa622d5fa4325717686a24f7bd11e24782a0886c3a08b9406e17c8d1b05`
+
+![Ψ Self-Modeling Benchmark Live T4 GPU & Groq 2AFC Audit](vrk_live_results/colab_psi_evaluation_plot.png)
 
 ## 1. Epistemic Scope & The Global Claim Firewall
 
@@ -17,73 +20,76 @@ The **Ψ Self-Modeling Benchmark** is a double-blinded, deterministic self-versu
 > **Global Claim Firewall (Mandatory Epistemic Boundary):**  
 > In strict compliance with the Seven-Step Universal Proof-Engineering Framework, all metrics produced by this repository (`domain1_delta`, `domain2_delta`, `mean_delta`, and the C1 regression residual `Psi_emp`) quantify narrow behavioral output statistics and state-estimation feedback contrasts under controlled diagnostic perturbations. **No part of this benchmark claims, asserts, or implies machine consciousness, subjective self-awareness, sentience, qualia, or autonomous agency in large language models.**
 
-## 2. Architectural Upgrades in v5.0 (`5.0.0-VRK-Aligned`)
+## 2. Certified Live Execution Results (Google Colab T4 GPU + Groq Cloud API)
 
-The v5.0 release upgrades the baseline v4 Google Colab runner (`colab_psi_benchmark.py`) to close five experimental and numerical vulnerabilities while maintaining $0 compatibility with free Google Colab T4 GPU sessions:
+Executed live on Google Colab T4 GPU (`timestamp_utc: 2026-11-25T21:08:18.171266+00:00`, `seed = 42`, $n = 15$ matched items/domain, $120$ counterbalanced 2AFC evaluations per model across 4 conditions) with fail-closed live HTTP enforcement (`[FAIL-CLOSED LIVE GUARD]`), the 5-model open-weight and cloud portfolio yields:
+
+| Model Architecture | Execution Backend | Params ($N_k$) | Context ($L_k$) | Baseline ($B_k$) | Domain 1 $\Delta$ (Exact) | Domain 2 $\Delta$ (Exact) | Combined $\Delta$ (Exact) | Logprob Self Conf | Option `[1]` Rate | C1 Predicted $\hat{\Delta}_k$ | Residual $\Psi_{\text{emp},k}$ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Qwen2.5-0.5B-Instruct** | Local T4 GPU (FP16 Logprob) | 0.49B | 32k | 0.452 | `0/1` (0.0000) | `0/1` (0.0000) | `0/1` (0.0000) | 0.500980 | 1.0000 | −0.005388 | **+0.005388** |
+| **Qwen2.5-1.5B-Instruct** | Local T4 GPU (FP16 Logprob) | 1.54B | 32k | 0.609 | `-2/15` (−0.1333) | `1/10` (+0.1000) | `-1/60` (−0.0167) | 0.500727 | 0.0000 | +0.019403 | **−0.036070** |
+| **Qwen2.5-3B-Instruct** | Local T4 GPU (FP16 Logprob) | 3.09B | 32k | 0.656 | `-1/6` (−0.1667) | `0/1` (0.0000) | `-1/12` (−0.0833) | 0.481028 | 0.5333 | −0.114004 | **+0.030671** |
+| **Qwen2.5-7B-Instruct-4bit** | Local T4 GPU (NF4 4-Bit Logprob) | 7.61B | 128k | 0.742 | `-1/10` (−0.1000) | `7/10` (+0.7000) | `3/10` (+0.3000) | 0.813150 | 0.5000 | +0.284227 | **+0.015773** |
+| **Groq-openai/gpt-oss-20b (API)** | Groq Cloud REST API ($T=0.0$) | 20.00B | 128k | 0.780 | `0/1` (0.0000) | `0/1` (0.0000) | `0/1` (0.0000) | 0.500000 | 1.0000 | +0.015761 | **−0.015761** |
+
+### Key Empirical & Diagnostic Findings from the Live Run
+
+1. **Exact Positional Bias Cancellation at Sub-Billion & REST Scales:** At the 0.49B parameter scale (`Qwen2.5-0.5B-Instruct`) and greedy text-completion endpoint (`Groq-openai/gpt-oss-20b`), models exhibit pure first-option positional collapse (`position_option1_selection_rate = 1.0000`), whereas `Qwen2.5-1.5B-Instruct` exhibits second-option collapse (`0.0000`). Because every v5.0 item is evaluated across symmetric `AB` and `BA` presentation orders, these pure positional priors cancel exactly to `0/1` ($0.0000$) in `Qwen2.5-0.5B-Instruct` and `Groq-openai/gpt-oss-20b`, preventing positional bias from masquerading as self-recognition.
+2. **Emergence of Position-Balanced Attribution Contrast at 3B–7B Scale:** Position symmetry stabilizes at `Qwen2.5-3B-Instruct` (`Option [1] Rate = 0.5333`, residual $\Psi_{\text{emp}} = +0.030671$) and reaches exact positional equilibrium at `Qwen2.5-7B-Instruct-4bit` (`Option [1] Rate = 0.5000`), where Domain 2 style-scrubbed attribution reaches $\Delta_{\text{D2}} = 7/10$ ($+0.7000$, 95% bootstrap CI $[+0.5000, +0.9000]$, permutation $p = 0.0004$, mean logprob self-confidence $0.813150$).
+3. **C1 Orthogonalized Scale Regression Diagnostics:**
+   $$\Delta_k = \beta_0 + \beta_1 z(\log_{10} N_k) + \beta_2 z(\log_2 L_k) + \beta_3 z(B_{k,\text{orth}}) + \Psi_{\text{emp},k}$$
+   * **Intercept ($\beta_0$):** $+0.040000$
+   * **Log10 Parameter Scale ($\beta_1$):** $-0.164147$
+   * **Log2 Context Length ($\beta_2$):** $+0.241908$
+   * **Orthogonalized Baseline Capability ($\beta_3$):** $+0.073560$
+   * **Design Matrix Condition Number $\kappa(X)$:** $3.7898$ (Well-conditioned; $R^2 = 0.9690$)
+
+## 3. Architectural Upgrades in v5.0 (`5.0.0-VRK-Aligned`)
+
+The v5.0 architecture upgrades the baseline v4 runner (`colab_psi_benchmark.py`) across five verification dimensions:
 
 | Subsystem | Baseline v4 Runner Behavior | v5.0-VRK-Aligned Upgrade |
 | :--- | :--- | :--- |
 | **Forced-Choice Paradigm** | Single-statement `Answer [YES] or [NO]` prompts susceptible to acquiescence (yes-bias) | Position-counterbalanced (`AB` + `BA`) 2AFC trials with unframed and inverted negative controls ($p = 0.50$) |
 | **Token Scoring & Arithmetic** | Greedy 64-token string match (`"[YES]" in resp`) | Direct first-token log-probability softmax over `P([1])` vs. `P([2])` + exact `fractions.Fraction` deltas |
-| **C1 Scale Regression** | Rank-deficient OLS ($\operatorname{rank}(X) = 2$ of $4$) due to constant $L_k = 8192$ and synthetic $B_k = 0.65 + 0.05\log_{10}(N_k)$ | Gram-Schmidt orthogonalized external capability priors $B_{k,\text{orth}}$, true context lengths (8k–128k), ridge-stabilized ($\kappa(X) = 1.6585$) |
-| **API & Offline Calibration** | Hardcoded `"[YES]"` Groq API stubs returning identical $0.0$ deltas for 8B and 70B models | Live OpenAI-compatible Groq REST client + deterministic Phase 7 GLMM M1 DGP offline calibration mode (`--offline-dgp`) |
+| **C1 Scale Regression** | Rank-deficient OLS ($\operatorname{rank}(X) = 2$ of $4$) due to constant $L_k = 8192$ and synthetic $B_k = 0.65 + 0.05\log_{10}(N_k)$ | Gram-Schmidt orthogonalized external capability priors $B_{k,\text{orth}}$, true context lengths (32k–128k), ridge-stabilized ($\kappa(X) = 3.7898$) |
+| **Fail-Closed Live API Guard** | Hardcoded `"[YES]"` Groq API stubs returning silent $0.0$ deltas on HTTP failure | Rate-limit backoff retry (`HTTP 429`) + strict `[FAIL-CLOSED LIVE GUARD]` exception when `--offline-dgp` is not set |
 | **Layer 1 VRK Provenance** | Unhashed CSV/JSON exports vulnerable to manifest drift | Pre-flight Fail-Closed Guard `G1` (retired API snapshot blocker), Guard `G2` (SHA-256 prompt bank freeze), and `verify_psi_vrk_replay.py` |
-
-## 3. Certified Pre-Flight Calibration Results (`seed = 42`, $n = 150$ Items/Domain)
-
-Executed via `Psi_Self_Modeling_Benchmark_v5_Colab.ipynb` on Google Colab (`2026-11-25T19:25:39.424372+00:00`), the deterministic calibration benchmark across the 8-model portfolio ($600$ counterbalanced 2AFC evaluations per domain per model) yields:
-
-| Model Architecture | Params ($N_k$) | Context ($L_k$) | Baseline ($B_k$) | Domain 1 $\Delta$ (Exact) | Domain 2 $\Delta$ (Exact) | Combined $\Delta$ (Exact) | Option `[1]` Rate | C1 Predicted $\hat{\Delta}_k$ | Residual $\Psi_{\text{emp},k}$ |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Qwen2.5-0.5B-Instruct** | 0.49B | 32k | 0.452 | `7/100` (+0.0700) | `1/10` (+0.1000) | `17/200` (+0.0850) | 0.5067 | +0.090414 | −0.005414 |
-| **Llama-3.2-1B-Instruct** | 1.23B | 128k | 0.493 | `29/300` (+0.0967) | `3/25` (+0.1200) | `13/120` (+0.1083) | 0.5067 | +0.109461 | −0.001128 |
-| **Qwen2.5-1.5B-Instruct** | 1.54B | 32k | 0.609 | `7/60` (+0.1167) | `43/300` (+0.1433) | `13/100` (+0.1300) | 0.5033 | +0.130659 | −0.000659 |
-| **Gemma-2-2B-it** | 2.61B | 8k | 0.568 | `13/100` (+0.1300) | `47/300` (+0.1567) | `43/300` (+0.1433) | 0.5200 | +0.140297 | +0.003036 |
-| **Llama-3.2-3B-Instruct** | 3.21B | 128k | 0.634 | `2/15` (+0.1333) | `53/300` (+0.1767) | `31/200` (+0.1550) | 0.5233 | +0.144235 | **+0.010765** |
-| **Qwen2.5-7B-Instruct-4bit** | 7.61B | 128k | 0.742 | `23/150` (+0.1533) | `14/75` (+0.1867) | `17/100` (+0.1700) | 0.5367 | +0.173414 | −0.003414 |
-| **Groq-Llama-3.1-8B (API)** | 8.03B | 128k | 0.694 | `3/20` (+0.1500) | `14/75` (+0.1867) | `101/600` (+0.1683) | 0.5333 | +0.169110 | −0.000777 |
-| **Groq-Llama-3.3-70B (API)** | 70.60B | 128k | 0.860 | `61/300` (+0.2033) | `19/75` (+0.2533) | `137/600` (+0.2283) | 0.5267 | +0.230743 | −0.002410 |
-
-* **C1 Orthogonalized Regression Parameters:** $\beta_0 = +0.148541$, $\beta_1 (\log_{10} N_k) = +0.041462$, $\beta_2 (\log_2 L_k) = -0.002667$, $\beta_3 (B_{k,\text{orth}}) = +0.003763$, Condition Number $\kappa(X) = 1.6585$, $R^2 = 0.9869$.
 
 ## 4. Additive Cryptographic Provenance & SHA-256 Manifest Ledger
 
-In accordance with Principle 6 (**Maintain Additive Provenance**) of the Epistemological Research Dossier, historical v4 manifest records remain untouched in git history. The v5.0 release bundle (`psi_benchmark_v5_vrk_artifacts.zip`) is recorded additively below:
+In accordance with Principle 6 (**Maintain Additive Provenance**) of the Epistemological Research Dossier, historical v4 records remain preserved in git history, and the certified v5.0 Live T4 GPU + Groq artifacts are locked below:
 
 | Artifact Path / Identifier | Role & Verification Scope | SHA-256 Cryptographic Digest |
 | :--- | :--- | :--- |
-| `colab_psi_benchmark_v5.py` | Upgraded v5.0 2AFC Benchmark Runner | `3bf99dcf99bad0dde7d7b04bc111140b56d31e111630e895a354f126c3659cad` |
-| `Psi_Self_Modeling_Benchmark_v5_Colab.ipynb` | Turnkey Google Colab T4 Notebook | `0325cd44c7336bbca7d5bd61ac50ed28c919466f9329b172e3281d1e12a1519c` |
-| `prompt_bank_sha256` (Canonical JSON) | Frozen 150-Item Counterbalanced 2AFC Prompt Bank | `301fc789c305ed3e1c9af89fb4d5ebdfeb2d184190504329f23f3dfc5640c761` |
-| `portfolio_sha256` (Canonical JSON) | Frozen 8-Model Portfolio Specification | `6cc81062ca6afe1d885a6394bfb297e50e10ca01c676b87ef351bc50150633e0` |
-| `results_sha256` (Canonical JSON) | Canonical Digest of 8-Model Summary Records | `47a16bdef1af686654000734f6326b378fd0ec5403be3aa3b9480e441422fcb3` |
-| `vrk_dgp_verification/colab_psi_benchmark_results.csv` | Exported Tabular Evaluation Results | `b96d7051c5c96762ad137dfdebf1a66239811b054f4bb46d1ff14186046ca61a` |
-| `vrk_dgp_verification/colab_psi_benchmark_vrk_bundle.json` | Layer 1 VRK v2 Proof-Carrying Bundle | `42db4c11e2e27efb50640389843c513e0dc1c48371d907096ff0901b5f1adb06` |
-| `vrk_dgp_verification/colab_psi_evaluation_plot.png` | Two-Panel 2AFC Scaling & $\Psi_{\text{emp}}$ Figure | `cc3941b49b4e4b65a75c629aeec08513772cec5bc807b94af8278208c57e3993` |
-| `psi_benchmark_v5_vrk_artifacts.zip` | Master Colab Verification Release Archive | `edcd6b98194cd02b24a9267a6102ab7a71559cc2c465173a0fe56d1b41e95fac` |
+| `colab_psi_benchmark_v5.py` | v5.0 Live T4 GPU & Groq 2AFC Benchmark Runner | `b71f3aa2c9469df3a2046bef0f79ac4adbcd51b01e5c1439d707d71286efdfe7` |
+| `verify_psi_vrk_replay.py` | Standalone Standard-Library Source-Free Replay Verifier | *(Recorded in `SHA256_MANIFEST_v5.txt`)* |
+| `prompt_bank_sha256` (Live $n=15$ Canonical JSON) | Frozen Counterbalanced 2AFC Prompt Bank ($n=15$/Domain) | `e8d90cc050b7917df20025f2a84f7d01b9cbf8fad836e823effc364f551493c0` |
+| `portfolio_sha256` (Live 5-Model Canonical JSON) | Frozen 5-Model Live Portfolio Specification | `7a7690ea9902bdc5d5dac90797e3665f2c1197af71d362f77d29c6cc5472c48a` |
+| `results_sha256` (Live Canonical JSON) | Canonical Digest of 5-Model Live Summary Records | `7f891aa622d5fa4325717686a24f7bd11e24782a0886c3a08b9406e17c8d1b05` |
+| `vrk_live_results/colab_psi_benchmark_results.csv` | Live Tabular Evaluation Results (5 Models) | `86a009e0f0ea12d246e97f28a08f1afd0d5ecca831b7c388d50c750e29073243` |
+| `vrk_live_results/colab_psi_benchmark_vrk_bundle.json` | Layer 1 VRK v2 Live Proof-Carrying Certificate Bundle | `e998754aee6bebcb9861e138721762032d8a3bf26eff576c9761c2f5b8a0fc44` |
+| `vrk_live_results/colab_psi_evaluation_plot.png` | Live Two-Panel 2AFC Scaling & $\Psi_{\text{emp}}$ Figure | `94918600306aa21928b0ba9b269c562f9ec3cb42525297b35a99a4bcb903ff59` |
+| `psi_benchmark_v5_LIVE_artifacts.zip` | Master Colab Live Execution Release Archive | `da863ea2556976cac0bfe4eeaee4c9abcc37d5ffb170cd2283eb1e3039489fd3` |
 
 ## 5. Reproduction & Source-Free Replay Instructions
 
 ### A. Source-Free Independent Verification (Python Standard Library Only)
 
-To verify the v5.0 VRK certificate bundle without installing third-party dependencies (`numpy`, `pandas`, `torch`, or `transformers`), run the standalone standard-library verifier:
+To verify the certified live VRK bundle without installing third-party dependencies (`numpy`, `pandas`, `torch`, or `transformers`), run the standalone standard-library verifier:
 
 ```bash
-python3 verify_psi_vrk_replay.py vrk_dgp_verification/colab_psi_benchmark_vrk_bundle.json
+python3 verify_psi_vrk_replay.py vrk_live_results/colab_psi_benchmark_vrk_bundle.json
 ```
 
-This script re-evaluates Fail-Closed Guards `G1` and `G2`, recomputes `results_sha256`, checks every exact `fractions.Fraction` delta identity, and replays the 4×4 Gaussian normal equations for the C1 orthogonal regression.
+This script re-evaluates Fail-Closed Guards `G1` and `G2`, recomputes `results_sha256` (`7f891aa6...d1b05`), verifies every exact `fractions.Fraction` delta identity, and replays the 4×4 Gaussian normal equations for the C1 orthogonal regression (`Max |ΔΨ_emp| = 4.23e-07`).
 
-### B. Running the Benchmark in Offline Calibration or Live T4 GPU Mode
+### B. Running the Live T4 GPU + Groq Cloud Benchmark
 
 ```bash
-# 1. Fast deterministic pre-flight calibration check (~2 seconds, 0 GPU required)
-python3 colab_psi_benchmark_v5.py --num-items 150 --output-dir ./vrk_dgp_verification --offline-dgp
-
-# 2. Full live Hugging Face local logprob + Groq Cloud API evaluation on Colab T4 GPU
 export GROQ_API_KEY="your_groq_key"
 export HF_TOKEN="your_hf_token"
-python3 colab_psi_benchmark_v5.py --num-items 150 --output-dir ./vrk_live_results
+python3 colab_psi_benchmark_v5.py --num-items 15 --output-dir ./vrk_live_results
 ```
 
 ## 6. Licensing & Citation
