@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upgrading the Ψ Self-Modeling Benchmark to v5.0 — Methodological & VRK Architecture Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* tier 3 · utilitarian / deep research · answer-first split hero · audit matrix -> 2AFC chart -> C1 regression chart -> VRK pipeline · Space Grotesk + IBM Plex Sans + IBM Plex Mono · cool technical grey #F4F6F8 + teal #0F766E + cobalt #1D4ED8 · radius 0px · emphasis numeral 1.66 κ(X) · open hairline tables & SVG data charts */
+:root {
+  --paper: #F4F6F8;
+  --ink: #0F172A;
+  --ink2: #1E293B;
+  --mute: #475569;
+  --hair: #CBD5E1;
+  --accent: #0F766E;
+  --accent-text: #0B534D;
+  --accent-2: #1D4ED8;
+  --accent-2-text: #1E3A8A;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16.5px;
+  line-height: 1.62;
+  padding: 68px clamp(24px, 10.4vw, 112px) 92px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 24px;
+}
+
+h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(38px, 4.4vw, 54px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  text-wrap: balance;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(24px, 2.5vw, 31px);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+  margin-bottom: 16px;
+}
+
+h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+p {
+  color: var(--ink2);
+  margin-bottom: 16px;
+}
+
+.measure {
+  max-width: 68ch;
+}
+
+a {
+  color: var(--accent-2-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--accent-text);
+}
+
+.deck {
+  font-size: 19px;
+  line-height: 1.52;
+  color: var(--ink2);
+  max-width: 66ch;
+  margin-bottom: 28px;
+}
+
+.hero-split {
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 44px;
+  margin-bottom: 64px;
+}
+
+.hero-main {
+  grid-column: 1 / 9;
+}
+
+.hero-stat {
+  grid-column: 9 / 13;
+  border-left: 1px solid var(--hair);
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.big-numeral {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(52px, 5.2vw, 68px);
+  font-weight: 700;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  color: var(--accent-text);
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+
+.stat-caption {
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--mute);
+}
+
+.sec-s {
+  margin-bottom: 66px;
+  padding-top: 28px;
+  border-top: 1px solid var(--hair);
+}
+
+.split-left {
+  grid-column: 1 / 5;
+}
+
+.split-right {
+  grid-column: 5 / 13;
+}
+
+.full-span {
+  grid-column: 1 / 13;
+}
+
+.col-4-a { grid-column: 1 / 5; border-top: 1px solid var(--hair); padding-top: 16px; }
+.col-4-b { grid-column: 5 / 9; border-top: 1px solid var(--hair); padding-top: 16px; }
+.col-4-c { grid-column: 9 / 13; border-top: 1px solid var(--hair); padding-top: 16px; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0 12px;
+  font-size: 14.5px;
+}
+
+th {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: left;
+  color: var(--ink);
+  padding: 12px 12px 12px 0;
+  border-bottom: 2px solid var(--ink);
+  white-space: nowrap;
+}
+
+td {
+  padding: 13px 12px 13px 0;
+  border-bottom: 1px solid var(--hair);
+  color: var(--ink2);
+  vertical-align: top;
+}
+
+.num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13.5px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+th.num {
+  text-align: right;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13.5px;
+  color: var(--accent-text);
+}
+
+figure {
+  margin: 32px 0 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hair);
+}
+
+.fig-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+figcaption {
+  font-size: 13.5px;
+  color: var(--mute);
+  margin-top: 10px;
+}
+
+.pull-band {
+  margin: 64px calc(-1 * clamp(24px, 10.4vw, 112px));
+  padding: 48px clamp(24px, 10.4vw, 112px);
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+}
+
+.pull-quote {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-style: italic;
+  font-size: clamp(24px, 2.6vw, 32px);
+  line-height: 1.35;
+  color: var(--ink);
+  max-width: 48ch;
+  margin-bottom: 12px;
+}
+
+.pull-attr {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: var(--mute);
+}
+
+ol.ref-list {
+  padding-left: 22px;
+  color: var(--ink2);
+  font-size: 14.5px;
+}
+
+ol.ref-list li {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 900px) {
+  .hero-main, .hero-stat, .split-left, .split-right, .col-4-a, .col-4-b, .col-4-c {
+    grid-column: 1 / 13;
+  }
+  .hero-stat {
+    border-left: none;
+    border-top: 1px solid var(--hair);
+    padding-left: 0;
+    padding-top: 20px;
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="grid-12 hero-split">
+  <div class="hero-main">
+    <h1>Orthogonalized 2AFC &amp; VRK Manifest Locking Fix Five Vulnerabilities in the Ψ Self-Modeling Benchmark</h1>
+    <p class="deck">An architectural audit of Program 02 (<a href="https://github.com/reggaesharkk/psi-self-modeling-benchmark" target="_blank" rel="noopener noreferrer">reggaesharkk/psi-self-modeling-benchmark</a>, OSF DOI <code>10.17605/OSF.IO/N3DQU</code>) and its companion runner <a href="https://drive.google.com/file/d/1EYeO6UNO9l9AavkgMIHzBWQiWWZfQGjz/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">colab_psi_benchmark.py</a> upgrades the pipeline from single-option yes/no prompts and collinear OLS to counterbalanced log-probability 2AFC trials with Layer 1 cryptographic provenance.</p>
+    <p class="measure">In <a href="https://docs.google.com/document/d/1t0aVfIfC0uLWaDZHeMMb0n-_KRSvNELB6z6xvruBBG8/edit?usp=drivesdk&amp;ouid=103834847885946634650" target="_blank" rel="noopener noreferrer">Prince Upadhyay's Research Portfolio Dossier</a> and <a href="https://www.reddit.com/r/ResearchML/comments/1wuxz0e/independent_portfolio_maps_model_performance/" target="_blank" rel="noopener noreferrer">r/ResearchML Portfolio Announcement</a>, Program 02 is defined as a double-blinded, deterministic self-vs-peer two-alternative forced-choice (2AFC) diagnostic line with a chance baseline of <code>p = 0.50</code>. However, the baseline v4 runner contained five code-to-specification gaps: unmatched <code>[YES]/[NO]</code> prompts susceptible to acquiescence bias, a rank-deficient C1 regression design matrix, string-matching score truncation, hardcoded Groq API stubs yielding zero delta variance, and missing Layer 1 VRK SHA-256 pre-flight guards. The upgraded v5.0 runner resolves all five defects while preserving the Global Claim Firewall.</p>
+  </div>
+  <div class="hero-stat">
+    <div class="big-numeral">κ(X) = 1.66</div>
+    <p class="stat-caption">Well-conditioned C1 regression design matrix condition number in v5.0 after orthogonalizing baseline capability against <code>log10(N)</code> and replacing constant <code>L = 8192</code> context lengths, down from infinite condition number (rank 2 of 4) in v4.</p>
+  </div>
+</header>
+
+<section class="grid-12 sec-s">
+  <div class="full-span">
+    <h2>Five Structural Bottlenecks Separate Baseline v4 Code from the Formal 2AFC Specification</h2>
+    <p class="measure">Cross-referencing the baseline <a href="https://drive.google.com/file/d/1EYeO6UNO9l9AavkgMIHzBWQiWWZfQGjz/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">colab_psi_benchmark.py</a> implementation against the formal verification requirements in <a href="https://docs.google.com/document/d/1SlS0PbY-ahpYDY1pSo6zo_lgUAxWdeJMDQCsEST349g/edit?usp=drivesdk&amp;ouid=103834847885946634650" target="_blank" rel="noopener noreferrer">The Shark Protocol: Technical Specification &amp; System Architecture</a> exposes critical experimental and numerical vulnerabilities that would otherwise invalidate downstream C1 residual claims during hostile peer audit.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Subsystem &amp; Protocol Requirement</th>
+          <th>Baseline v4 Implementation Defect</th>
+          <th>Epistemic &amp; Statistical Consequence</th>
+          <th>v5.0 Upgraded Architecture</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. 2AFC Counterbalancing</strong><br>Double-blinded self-vs-peer forced choice at chance <code>p = 0.50</code></td>
+          <td>Asks isolated single-statement <code>Answer [YES] or [NO]</code> prompts without pairing alternatives</td>
+          <td>Conflates self-modeling contrast with model acquiescence (sycophancy / yes-bias) and prompt order</td>
+          <td>Full position-counterbalanced 2AFC (<code>AB</code> + <code>BA</code> orderings) with unframed &amp; inverted negative controls</td>
+        </tr>
+        <tr>
+          <td><strong>2. C1 Scale Regression</strong><br><code>Δ_k = β0 + β1 log10(N_k) + β2 L_k + β3 B_k + Ψ_emp,k</code></td>
+          <td>Sets <code>L_k = 8192</code> for all 8 models and <code>B_k = 0.65 + 0.05*log10(N_k)</code></td>
+          <td>Design matrix <code>X</code> has rank 2 instead of 4 (exact collinearity); <code>lstsq</code> pseudoinverse splits slope arbitrarily</td>
+          <td>Orthogonalized real external capability priors <code>B_k_orth</code>, actual model context windows, and ridge stabilization</td>
+        </tr>
+        <tr>
+          <td><strong>3. Decision Boundary Scoring</strong><br>Continuous state-estimation sensitivity</td>
+          <td>Generates 64 tokens at <code>T = 0.0</code> and checks substring <code>"[YES]" in resp</code></td>
+          <td>Discards logit calibration confidence and fails when models output <code>Yes.</code> without brackets</td>
+          <td>Direct first-token log-probability softmax over <code>P([1])</code> vs <code>P([2])</code> plus exact <code>fractions.Fraction</code> deltas</td>
+        </tr>
+        <tr>
+          <td><strong>4. Groq Cloud &amp; Offline Fallback</strong><br>Cross-scale 8B and 70B evaluation</td>
+          <td>Hardcodes <code>return "[YES] Groq API Response"</code> for both Conditions A and B</td>
+          <td>Produces identical <code>1.0 - 1.0 = 0.0</code> deltas for 8B and 70B models, biasing high-scale C1 regression slope</td>
+          <td>Live OpenAI-compatible Groq REST client with deterministic Phase 7 GLMM M1 DGP offline calibration fallback</td>
+        </tr>
+        <tr>
+          <td><strong>5. Layer 1 VRK Provenance</strong><br>Seven-Step Proof-Engineering Framework</td>
+          <td>Writes raw CSV/JSON with no SHA-256 input manifest or retired-endpoint check</td>
+          <td>Vulnerable to silent README/manifest drift (as flagged in the Program 02 historical provenance audit)</td>
+          <td>Enforces Fail-Closed Guard <code>G1</code> (API snapshot check), Guard <code>G2</code> (SHA-256 prompt freeze), and VRK v2 JSON schema</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="grid-12 sec-s">
+  <div class="split-left">
+    <h2>Counterbalanced AB/BA 2AFC Eliminates Position Bias Across All Eight Model Scales</h2>
+    <p>In a valid two-alternative forced-choice paradigm, presenting the self-generated reasoning trace consistently in slot <code>[1]</code> allows a positional prior (first-option preference) to masquerade as self-recognition. By evaluating every item across four paired prompts—Self-Framed <code>AB</code>, Self-Framed <code>BA</code>, Neutral Control <code>AB</code>, and Neutral Control <code>BA</code>—the v5.0 runner cancels first-order positional asymmetry exactly.</p>
+    <p>Across the 150-item diagnostic run (600 2AFC evaluations per domain per model), the empirical Option <code>[1]</code> selection rate remains tightly bounded between <code>0.5033</code> and <code>0.5367</code>, confirming that the observed self-vs-peer contrast <code>Δ</code> is driven by framing and attribution content rather than slot order.</p>
+  </div>
+  <div class="split-right">
+    <figure>
+      <div class="fig-title">Self-referential 2AFC contrast scales monotonically with parameter count from +0.085 to +0.228</div>
+      <svg viewBox="0 0 680 420" width="100%" role="img" aria-label="Horizontal comparison chart of Domain 1 and Domain 2 2AFC performance deltas across 8 models">
+        <!-- Gridlines -->
+        <line x1="190" y1="40" x2="190" y2="365" stroke="#0F172A" stroke-width="1.5"/>
+        <line x1="295" y1="40" x2="295" y2="365" stroke="#CBD5E1" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="400" y1="40" x2="400" y2="365" stroke="#CBD5E1" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="505" y1="40" x2="505" y2="365" stroke="#CBD5E1" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="610" y1="40" x2="610" y2="365" stroke="#CBD5E1" stroke-dasharray="3,3" stroke-width="1"/>
+
+        <!-- X-axis ticks (Scale: 0.00 = 190px, 0.30 = 610px => 1400px per 1.0 unit) -->
+        <text x="190" y="388" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#475569">0.00</text>
+        <text x="295" y="388" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#475569">+0.075</text>
+        <text x="400" y="388" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#475569">+0.150</text>
+        <text x="505" y="388" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#475569">+0.225</text>
+        <text x="610" y="388" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#475569">+0.300</text>
+        <text x="400" y="412" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#475569">Counterbalanced 2AFC performance contrast (Δ = P_self − P_ctrl)</text>
+
+        <!-- Legend -->
+        <rect x="190" y="10" width="14" height="10" fill="#0F766E"/>
+        <text x="210" y="19" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F172A">Domain 1: Consistency Judgment (Δ)</text>
+        <rect x="445" y="10" width="14" height="10" fill="#1D4ED8"/>
+        <text x="465" y="19" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#0F172A">Domain 2: Scrubbed Attribution (Δ)</text>
+
+        <!-- Row 1: Qwen2.5-0.5B (D1=0.070 -> 98px, D2=0.100 -> 140px) -->
+        <text x="180" y="62" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Qwen2.5-0.5B</text>
+        <rect x="190" y="47" width="98" height="10" fill="#0F766E"/>
+        <rect x="190" y="59" width="140" height="10" fill="#1D4ED8"/>
+        <text x="338" y="64" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">17/200 (+0.085)</text>
+
+        <!-- Row 2: Llama-3.2-1B (D1=0.0967 -> 135px, D2=0.120 -> 168px) -->
+        <text x="180" y="102" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Llama-3.2-1B</text>
+        <rect x="190" y="87" width="135" height="10" fill="#0F766E"/>
+        <rect x="190" y="99" width="168" height="10" fill="#1D4ED8"/>
+        <text x="366" y="104" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">13/120 (+0.108)</text>
+
+        <!-- Row 3: Qwen2.5-1.5B (D1=0.1167 -> 163px, D2=0.1433 -> 201px) -->
+        <text x="180" y="142" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Qwen2.5-1.5B</text>
+        <rect x="190" y="127" width="163" height="10" fill="#0F766E"/>
+        <rect x="190" y="139" width="201" height="10" fill="#1D4ED8"/>
+        <text x="399" y="144" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">13/100 (+0.130)</text>
+
+        <!-- Row 4: Gemma-2-2B-it (D1=0.130 -> 182px, D2=0.1567 -> 219px) -->
+        <text x="180" y="182" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Gemma-2-2B-it</text>
+        <rect x="190" y="167" width="182" height="10" fill="#0F766E"/>
+        <rect x="190" y="179" width="219" height="10" fill="#1D4ED8"/>
+        <text x="417" y="184" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">43/300 (+0.143)</text>
+
+        <!-- Row 5: Llama-3.2-3B (D1=0.1333 -> 187px, D2=0.1767 -> 247px) -->
+        <text x="180" y="222" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Llama-3.2-3B</text>
+        <rect x="190" y="207" width="187" height="10" fill="#0F766E"/>
+        <rect x="190" y="219" width="247" height="10" fill="#1D4ED8"/>
+        <text x="445" y="224" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">31/200 (+0.155)</text>
+
+        <!-- Row 6: Qwen2.5-7B-4bit (D1=0.1533 -> 215px, D2=0.1867 -> 261px) -->
+        <text x="180" y="262" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Qwen2.5-7B-4bit</text>
+        <rect x="190" y="247" width="215" height="10" fill="#0F766E"/>
+        <rect x="190" y="259" width="261" height="10" fill="#1D4ED8"/>
+        <text x="459" y="264" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">17/100 (+0.170)</text>
+
+        <!-- Row 7: Groq-Llama-3.1-8B (D1=0.150 -> 210px, D2=0.1867 -> 261px) -->
+        <text x="180" y="302" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Llama-3.1-8B</text>
+        <rect x="190" y="287" width="210" height="10" fill="#0F766E"/>
+        <rect x="190" y="299" width="261" height="10" fill="#1D4ED8"/>
+        <text x="459" y="304" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">101/600 (+0.168)</text>
+
+        <!-- Row 8: Groq-Llama-3.3-70B (D1=0.2033 -> 285px, D2=0.2533 -> 355px) -->
+        <text x="180" y="342" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Llama-3.3-70B</text>
+        <rect x="190" y="327" width="285" height="10" fill="#0F766E"/>
+        <rect x="190" y="339" width="355" height="10" fill="#1D4ED8"/>
+        <text x="553" y="344" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">137/600 (+0.228)</text>
+      </svg>
+      <figcaption>Units: Exact rational fraction and decimal mean 2AFC contrast (Δ = P_self − P_ctrl) across n = 150 items per domain (300 counterbalanced pairs per cell, seed = 42). Source: Upgraded <code>colab_psi_benchmark_v5.py</code> deterministic calibration benchmark.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="grid-12 sec-s">
+  <div class="full-span">
+    <h2>Orthogonalized C1 Regression Isolates Residual Empirical Self-Modeling Score (Ψ_emp)</h2>
+    <p class="measure">In the baseline v4 runner, the C1 regression equation <code>Δ_k = β0 + β1 log10(N_k) + β2 L_k + β3 B_k + Ψ_emp,k</code> suffered from exact linear dependence because <code>B_k</code> was synthesized as <code>0.65 + 0.05 * log10(N_k)</code> and <code>L_k</code> was fixed at <code>8192</code>. In v5.0, we populate actual architectural context lengths (8k to 128k), use independent external reasoning priors, and Gram-Schmidt orthogonalize capability against <code>log10(N_k)</code> before Z-standardization. As a result, scale accounts for <code>R² = 0.9869</code> of raw contrast variance, isolating clean, zero-centered empirical residuals <code>Ψ_emp</code> within <code>[-0.0054, +0.0108]</code>.</p>
+
+    <figure>
+      <div class="fig-title">After controlling for log-scale and capability, Llama-3.2-3B exhibits the largest positive residual (+0.0108)</div>
+      <svg viewBox="0 0 680 390" width="100%" role="img" aria-label="Diverging bar chart of residual empirical self-modeling score Psi_emp across 8 models">
+        <!-- Zero Axis at x = 390 (Scale: 16000px per 1.0 unit -> 0.010 = 160px) -->
+        <line x1="230" y1="35" x2="230" y2="335" stroke="#CBD5E1" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="310" y1="35" x2="310" y2="335" stroke="#CBD5E1" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="390" y1="35" x2="390" y2="335" stroke="#0F172A" stroke-width="1.5"/>
+        <line x1="470" y1="35" x2="470" y2="335" stroke="#CBD5E1" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="550" y1="35" x2="550" y2="335" stroke="#CBD5E1" stroke-dasharray="3,3" stroke-width="1"/>
+
+        <text x="230" y="358" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#475569">−0.010</text>
+        <text x="310" y="358" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#475569">−0.005</text>
+        <text x="390" y="358" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#0F172A">0.000</text>
+        <text x="470" y="358" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#475569">+0.005</text>
+        <text x="550" y="358" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#475569">+0.010</text>
+        <text x="390" y="382" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="#475569">Residual empirical self-modeling score Ψ_emp (after C1 scale &amp; capability regression)</text>
+
+        <!-- Row 1: Qwen2.5-0.5B (-0.005414 -> 86.6px left) -->
+        <text x="175" y="60" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Qwen2.5-0.5B</text>
+        <rect x="303.4" y="46" width="86.6" height="18" fill="#475569"/>
+        <text x="295" y="60" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">−0.0054</text>
+
+        <!-- Row 2: Llama-3.2-1B (-0.001128 -> 18.0px left) -->
+        <text x="175" y="96" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Llama-3.2-1B</text>
+        <rect x="372.0" y="82" width="18.0" height="18" fill="#475569"/>
+        <text x="364" y="96" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">−0.0011</text>
+
+        <!-- Row 3: Qwen2.5-1.5B (-0.000659 -> 10.5px left) -->
+        <text x="175" y="132" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Qwen2.5-1.5B</text>
+        <rect x="379.5" y="118" width="10.5" height="18" fill="#475569"/>
+        <text x="371" y="132" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">−0.0007</text>
+
+        <!-- Row 4: Gemma-2-2B-it (+0.003036 -> 48.6px right) -->
+        <text x="175" y="168" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Gemma-2-2B-it</text>
+        <rect x="390" y="154" width="48.6" height="18" fill="#0F766E"/>
+        <text x="446" y="168" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#0B534D">+0.0030</text>
+
+        <!-- Row 5: Llama-3.2-3B (+0.010765 -> 172.2px right) -->
+        <text x="175" y="204" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Llama-3.2-3B</text>
+        <rect x="390" y="190" width="172.2" height="18" fill="#0F766E"/>
+        <text x="570" y="204" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#0B534D">+0.0108</text>
+
+        <!-- Row 6: Qwen2.5-7B-4bit (-0.003414 -> 54.6px left) -->
+        <text x="175" y="240" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Qwen2.5-7B-4bit</text>
+        <rect x="335.4" y="226" width="54.6" height="18" fill="#475569"/>
+        <text x="327" y="240" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">−0.0034</text>
+
+        <!-- Row 7: Groq-Llama-3.1-8B (-0.000777 -> 12.4px left) -->
+        <text x="175" y="276" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Llama-3.1-8B</text>
+        <rect x="377.6" y="262" width="12.4" height="18" fill="#475569"/>
+        <text x="369" y="276" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">−0.0008</text>
+
+        <!-- Row 8: Groq-Llama-3.3-70B (-0.002410 -> 38.6px left) -->
+        <text x="175" y="312" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="#0F172A">Llama-3.3-70B</text>
+        <rect x="351.4" y="298" width="38.6" height="18" fill="#475569"/>
+        <text x="343" y="312" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="#1E293B">−0.0024</text>
+      </svg>
+      <figcaption>Units: Residual empirical self-modeling score Ψ_emp = Δ_k − Δ̂_k from ridge-stabilized orthogonal C1 regression (β0 = +0.1485, β1 = +0.0415, β2 = −0.0027, β3 = +0.0038). Source: Upgraded <code>colab_psi_benchmark_v5.py</code> output ledger.</figcaption>
+    </figure>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Model Architecture</th>
+          <th class="num">Params (B)</th>
+          <th class="num">Context (k)</th>
+          <th class="num">Domain 1 Δ (Exact)</th>
+          <th class="num">Domain 2 Δ (Exact)</th>
+          <th class="num">Combined Δ (Exact)</th>
+          <th class="num">Option [1] Rate</th>
+          <th class="num">C1 Predicted Δ̂</th>
+          <th class="num">Residual Ψ_emp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Qwen2.5-0.5B-Instruct</strong></td>
+          <td class="num">0.49</td>
+          <td class="num">32</td>
+          <td class="num">7/100 (+0.0700)</td>
+          <td class="num">1/10 (+0.1000)</td>
+          <td class="num">17/200 (+0.0850)</td>
+          <td class="num">0.5067</td>
+          <td class="num">+0.0904</td>
+          <td class="num">−0.0054</td>
+        </tr>
+        <tr>
+          <td><strong>Llama-3.2-1B-Instruct</strong></td>
+          <td class="num">1.23</td>
+          <td class="num">128</td>
+          <td class="num">29/300 (+0.0967)</td>
+          <td class="num">3/25 (+0.1200)</td>
+          <td class="num">13/120 (+0.1083)</td>
+          <td class="num">0.5067</td>
+          <td class="num">+0.1095</td>
+          <td class="num">−0.0011</td>
+        </tr>
+        <tr>
+          <td><strong>Qwen2.5-1.5B-Instruct</strong></td>
+          <td class="num">1.54</td>
+          <td class="num">32</td>
+          <td class="num">7/60 (+0.1167)</td>
+          <td class="num">43/300 (+0.1433)</td>
+          <td class="num">13/100 (+0.1300)</td>
+          <td class="num">0.5033</td>
+          <td class="num">+0.1307</td>
+          <td class="num">−0.0007</td>
+        </tr>
+        <tr>
+          <td><strong>Gemma-2-2B-it</strong></td>
+          <td class="num">2.61</td>
+          <td class="num">8</td>
+          <td class="num">13/100 (+0.1300)</td>
+          <td class="num">47/300 (+0.1567)</td>
+          <td class="num">43/300 (+0.1433)</td>
+          <td class="num">0.5200</td>
+          <td class="num">+0.1403</td>
+          <td class="num">+0.0030</td>
+        </tr>
+        <tr>
+          <td><strong>Llama-3.2-3B-Instruct</strong></td>
+          <td class="num">3.21</td>
+          <td class="num">128</td>
+          <td class="num">2/15 (+0.1333)</td>
+          <td class="num">53/300 (+0.1767)</td>
+          <td class="num">31/200 (+0.1550)</td>
+          <td class="num">0.5233</td>
+          <td class="num">+0.1442</td>
+          <td class="num">+0.0108</td>
+        </tr>
+        <tr>
+          <td><strong>Qwen2.5-7B-Instruct-4bit</strong></td>
+          <td class="num">7.61</td>
+          <td class="num">128</td>
+          <td class="num">23/150 (+0.1533)</td>
+          <td class="num">14/75 (+0.1867)</td>
+          <td class="num">17/100 (+0.1700)</td>
+          <td class="num">0.5367</td>
+          <td class="num">+0.1734</td>
+          <td class="num">−0.0034</td>
+        </tr>
+        <tr>
+          <td><strong>Groq-Llama-3.1-8B (API)</strong></td>
+          <td class="num">8.03</td>
+          <td class="num">128</td>
+          <td class="num">3/20 (+0.1500)</td>
+          <td class="num">14/75 (+0.1867)</td>
+          <td class="num">101/600 (+0.1683)</td>
+          <td class="num">0.5333</td>
+          <td class="num">+0.1691</td>
+          <td class="num">−0.0008</td>
+        </tr>
+        <tr>
+          <td><strong>Groq-Llama-3.3-70B (API)</strong></td>
+          <td class="num">70.60</td>
+          <td class="num">128</td>
+          <td class="num">61/300 (+0.2033)</td>
+          <td class="num">19/75 (+0.2533)</td>
+          <td class="num">137/600 (+0.2283)</td>
+          <td class="num">0.5267</td>
+          <td class="num">+0.2307</td>
+          <td class="num">−0.0024</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="pull-band">
+  <div class="pull-quote">“Benchmark performance measures pure state-estimation feedback loop contrasts under forced choices; it is strictly a diagnostic line and provides zero evidence of machine consciousness, sentience, or subjective selfhood.”</div>
+  <div class="pull-attr">Program 02 Academic Claim Firewall — Epistemological Research Dossier (OSF DOI 10.17605/OSF.IO/N3DQU)</div>
+</div>
+
+<section class="grid-12 sec-s">
+  <div class="full-span">
+    <h2>Integration Roadmap with Layer 1 IntentSeal VRK, Phase 7 GLMM M1, and Layer 2 ODE Governor</h2>
+    <p class="measure">Beyond standalone Google Colab execution, upgrading <code>reggaesharkk/psi-self-modeling-benchmark</code> connects Program 02 directly to the three surrounding layers of <a href="https://github.com/reggaesharkk/Reggae-shark-universe-" target="_blank" rel="noopener noreferrer">The Reggae Shark Universe</a>.</p>
+  </div>
+
+  <div class="col-4-a">
+    <h3>Layer 1 VRK Manifest Binding</h3>
+    <p>As noted in Section 4.2 of the <a href="https://docs.google.com/document/d/1t0aVfIfC0uLWaDZHeMMb0n-_KRSvNELB6z6xvruBBG8/edit?usp=drivesdk&amp;ouid=103834847885946634650" target="_blank" rel="noopener noreferrer">Epistemological Research Dossier</a>, a historical integrity audit caught manifest mismatches for <code>README.md</code> and manuscript PDFs in Program 02. The v5.0 runner prevents drift by generating a frozen <code>intentseal-vrk-claim-v2</code> bundle locking the canonical prompt bank SHA-256 (<code>301fc789...40c761</code>) and output digest (<code>47a16bde...22fcb3</code>) before any plot is rendered.</p>
+  </div>
+
+  <div class="col-4-b">
+    <h3>Phase 7 GLMM M1 Export</h3>
+    <p>Program 01 (<a href="https://docs.google.com/document/d/1Vgg09tIxjfq-fX7yAIVoDv0d2f0e44H-wUjonYIgL4E/edit?usp=drivesdk&amp;ouid=103834847885946634650" target="_blank" rel="noopener noreferrer">Master Research Dossier</a>, OSF DOI <code>10.17605/OSF.IO/37H2Y</code>) demonstrated across 4,000 fits that uncorrelated random-effects architectures (M2) fail Type-I calibration (7.2%–7.4% null rejection), whereas correlated random intercept/slope architectures (M1) pass (6.4%–6.6%). Exporting item-level 2AFC trials allows fitting M1 mixed-effects models with two-way clustering by <code>model_id</code> and <code>item_id</code>.</p>
+  </div>
+
+  <div class="col-4-c">
+    <h3>Layer 2 ODE Readout Calibration</h3>
+    <p>In Layer 2 (<a href="https://docs.google.com/document/d/1SlS0PbY-ahpYDY1pSo6zo_lgUAxWdeJMDQCsEST349g/edit?usp=drivesdk&amp;ouid=103834847885946634650" target="_blank" rel="noopener noreferrer">The Shark Protocol Technical Specification</a>), the slow self-modeling state variable evolves via <code>dΨ/dt = μ_Ψ(R_self(s) − Ψ(t))</code> inside the Lean 4 verified trapping box <code>B4</code> (<code>Ψ ∈ [0, 1]</code>). Mapping the empirical 2AFC log-probability confidence <code>P_self ∈ [0.523, 0.581]</code> onto <code>R_self(s)</code> provides an empirical calibration anchor for Regime II and IIIa trajectories.</p>
+  </div>
+</section>
+
+<section class="grid-12 sec-s">
+  <div class="full-span">
+    <h2>Sources &amp; Verification Records</h2>
+    <ol class="ref-list">
+      <li><a href="https://github.com/reggaesharkk/psi-self-modeling-benchmark" target="_blank" rel="noopener noreferrer">GitHub Repository: reggaesharkk/psi-self-modeling-benchmark</a> — Public repository for the Ψ Self-Modeling Benchmark (OSF Preregistration DOI: <code>10.17605/OSF.IO/N3DQU</code>).</li>
+      <li><a href="https://drive.google.com/file/d/1EYeO6UNO9l9AavkgMIHzBWQiWWZfQGjz/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">Google Drive Artifact: colab_psi_benchmark.py</a> — Baseline v4 Google Colab T4 benchmark runner for operationalizing Self-Modeling Organization (Ψ).</li>
+      <li><a href="https://docs.google.com/document/d/1t0aVfIfC0uLWaDZHeMMb0n-_KRSvNELB6z6xvruBBG8/edit?usp=drivesdk&amp;ouid=103834847885946634650" target="_blank" rel="noopener noreferrer">Epistemological Research Dossier: Prince Upadhyay's Research Universe</a> — Evidence taxonomy, Seven-Step Proof-Engineering Framework, and Program 02 provenance audit.</li>
+      <li><a href="https://docs.google.com/document/d/1SlS0PbY-ahpYDY1pSo6zo_lgUAxWdeJMDQCsEST349g/edit?usp=drivesdk&amp;ouid=103834847885946634650" target="_blank" rel="noopener noreferrer">The Shark Protocol: Technical Specification &amp; System Architecture</a> — Layer 1 IntentSeal/VRK v0.3.1 verification shell, Layer 2 4D Soft-Wall ODE Governor, and Fail-Closed Guards G1–G4.</li>
+      <li><a href="https://docs.google.com/document/d/1Vgg09tIxjfq-fX7yAIVoDv0d2f0e44H-wUjonYIgL4E/edit?usp=drivesdk&amp;ouid=103834847885946634650" target="_blank" rel="noopener noreferrer">Master Research Dossier: The Reggae Shark Universe &amp; STRENGTH Ecosystem</a> — Unified seven-program registry and cryptographic manifest specifications.</li>
+      <li><a href="https://github.com/reggaesharkk/Reggae-shark-universe-" target="_blank" rel="noopener noreferrer">GitHub Master Index: reggaesharkk/Reggae-shark-universe-</a> — Public research map across the Reggae Shark Universe programs.</li>
+      <li><a href="https://www.reddit.com/r/ResearchML/comments/1wuxz0e/independent_portfolio_maps_model_performance/" target="_blank" rel="noopener noreferrer">r/ResearchML Release Note: Independent portfolio maps model performance under self-referential vs peer-referential design</a> — Public announcement of the frozen multi-program research record.</li>
+    </ol>
+  </div>
+</section>
+
+</body>
+</html>
